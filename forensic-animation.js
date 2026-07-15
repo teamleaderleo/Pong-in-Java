@@ -6,30 +6,10 @@
   const path = document.querySelector('#forensic-path');
   const motion = document.querySelector('#forensic-motion');
   const replayBall = document.querySelector('#forensic-replay-ball');
+  const coarsePointer = window.matchMedia('(hover: none), (pointer: coarse)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   if (!review || !stage || !path || !motion || !replayBall) return;
-
-  // Keep the commentary while allowing the rally to continue uninterrupted.
-  let rafSerial = 0;
-  const rafTimers = new Map();
-
-  window.requestAnimationFrame = (callback) => {
-    const id = ++rafSerial;
-    const timer = window.setTimeout(() => {
-      rafTimers.delete(id);
-      callback(performance.now());
-    }, 16);
-    rafTimers.set(id, timer);
-    return id;
-  };
-
-  window.cancelAnimationFrame = (id) => {
-    const timer = rafTimers.get(id);
-    if (timer !== undefined) {
-      clearTimeout(timer);
-      rafTimers.delete(id);
-    }
-  };
 
   let lastSignature = '';
   let hideTimer = null;
@@ -45,8 +25,7 @@
 
     clearTimeout(hideTimer);
 
-    // Harmless anomalies stay in the counters and logs. They no longer cover
-    // the court or interrupt play.
+    // Harmless anomalies stay in counters and logs only.
     if (review.classList.contains('weird') || review.classList.contains('nudge')) {
       hideReview();
       return;
@@ -54,8 +33,12 @@
 
     hideTimer = window.setTimeout(
       hideReview,
-      review.classList.contains('goal') ? 900 : 700
+      review.classList.contains('goal') ? 800 : 600
     );
+
+    // Phones get the compact text callout without an SVG animation competing
+    // with the game loop. Desktop keeps the tiny evidence replay.
+    if (coarsePointer.matches || reducedMotion.matches) return;
 
     const points = path.getAttribute('points')?.trim();
     if (!points || points === lastSignature) return;
@@ -68,14 +51,10 @@
 
     if (coordinates.length < 2) return;
 
-    const pathData = coordinates
+    motion.setAttribute('path', coordinates
       .map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x} ${y}`)
-      .join(' ');
-
-    motion.setAttribute('path', pathData);
-    motion.setAttribute('dur', review.classList.contains('goal') ? '.8s' : '.55s');
-    replayBall.classList.remove('running');
-    void replayBall.getBoundingClientRect();
+      .join(' '));
+    motion.setAttribute('dur', review.classList.contains('goal') ? '.65s' : '.45s');
     replayBall.classList.add('running');
 
     try {
@@ -89,5 +68,4 @@
 
   const observer = new MutationObserver(playEvidence);
   observer.observe(review, { attributes: true, attributeFilter: ['class'] });
-  observer.observe(path, { attributes: true, attributeFilter: ['points'] });
 })();
