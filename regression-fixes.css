@@ -2,96 +2,83 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+/* The raw detector banner duplicated the forensic callout and covered play. */
 .bullshit-banner {
-  inset: 10px 10px auto;
-  min-height: 0;
-  place-content: start center;
-  gap: 4px;
-  padding: 10px 12px;
-  transform: translateY(-8px) scale(.98);
-}
-
-.bullshit-banner::before {
-  border: 1px solid rgba(255, 255, 255, .12);
-  border-radius: 10px;
-  background: rgba(7, 7, 10, .9);
-  backdrop-filter: none;
-}
-
-.bullshit-banner.visible {
-  transform: translateY(0) scale(1);
-}
-
-.bullshit-banner strong {
-  font-size: clamp(1.15rem, 4.6vw, 2.5rem);
-  line-height: .96;
-}
-
-.bullshit-banner span {
-  font-size: clamp(.65rem, 1.8vw, .95rem);
+  display: none !important;
 }
 
 .forensic-review {
-  place-items: end center;
+  place-items: start;
+  padding: 8px;
+  transform: none;
 }
 
 .forensic-review::before {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, .86) 0,
-    rgba(0, 0, 0, .58) 30%,
-    rgba(0, 0, 0, .08) 62%,
-    transparent 76%
-  );
-  backdrop-filter: none;
+  display: none;
 }
 
-.forensic-review.weird::before,
-.forensic-review.nudge::before {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, .82) 0,
-    rgba(0, 0, 0, .5) 28%,
-    rgba(0, 0, 0, .06) 60%,
-    transparent 74%
-  );
-}
-
-.forensic-review.goal::before {
-  background: linear-gradient(
-    to top,
-    rgba(35, 0, 10, .9) 0,
-    rgba(12, 0, 4, .55) 32%,
-    rgba(0, 0, 0, .08) 64%,
-    transparent 78%
-  );
+.forensic-evidence {
+  opacity: .48;
 }
 
 .forensic-review-card {
-  width: min(92%, 640px);
-  margin-bottom: clamp(8px, 2.5%, 22px);
-  gap: 6px;
-  padding: clamp(10px, 2.2vw, 18px) clamp(12px, 3vw, 22px);
-  background: rgba(8, 8, 12, .82);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, .3), 0 0 28px rgba(255, 45, 88, .2);
+  width: min(52%, 390px);
+  margin: 0;
+  gap: 3px;
+  padding: 7px 9px;
+  border-width: 1px;
+  border-radius: 7px;
+  background: rgba(7, 7, 10, .76);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, .38);
+  text-align: left;
+  transform: none;
+}
+
+#forensic-case {
+  font-size: .52rem;
+  letter-spacing: .1em;
 }
 
 #forensic-title {
-  font-size: clamp(1.25rem, 4.8vw, 3.2rem);
-  line-height: .94;
+  font-size: clamp(.82rem, 2.3vw, 1.15rem);
+  line-height: 1;
+  letter-spacing: -.025em;
+  text-shadow: none;
 }
 
 #forensic-detail {
-  font-size: clamp(.68rem, 1.8vw, .98rem);
+  display: none;
 }
 
 #forensic-verdict {
-  padding: 5px 9px;
-  font-size: clamp(.62rem, 1.5vw, .82rem);
+  justify-self: start;
+  padding: 2px 5px;
+  font-size: .52rem;
+  letter-spacing: .04em;
 }
 
 .court-stage.reviewing canvas {
-  filter: grayscale(.22) brightness(.76) contrast(1.08);
+  filter: none;
+}
+
+#forensic-path {
+  stroke-width: 3;
+  opacity: .55;
+}
+
+#forensic-arrow {
+  stroke-width: 5;
+  opacity: .7;
+}
+
+#forensic-impact {
+  stroke-width: 5;
+  opacity: .7;
+}
+
+.forensic-cross {
+  stroke-width: 6;
+  opacity: .7;
 }
 
 @media (max-width: 600px) {
@@ -109,50 +96,50 @@
   }
 
   .stat-card {
-    flex: 0 0 108px;
-    min-height: 54px;
-    padding: 6px 5px;
+    flex: 0 0 82px;
+    min-height: 38px;
+    padding: 4px;
     scroll-snap-align: start;
   }
 
   .stat-card span {
     min-height: 0;
     white-space: nowrap;
-    font-size: .54rem;
+    font-size: .43rem;
+    letter-spacing: .035em;
   }
 
   .stat-card output {
-    margin: 1px 0;
-    font-size: 1.25rem;
+    margin: 0;
+    font-size: .98rem;
+  }
+
+  .stat-card small {
+    display: none;
+  }
+
+  .forensic-review {
+    padding: 5px;
   }
 
   .forensic-evidence {
-    opacity: .8;
+    opacity: .4;
   }
 
   .forensic-review-card {
-    width: calc(100% - 14px);
-    margin: 0 7px 7px;
-    padding: 9px 10px;
-    border-width: 1px;
-    transform: none;
+    width: min(72%, 260px);
+    padding: 5px 7px;
   }
 
   #forensic-case {
-    font-size: .58rem;
+    font-size: .45rem;
   }
 
   #forensic-title {
-    font-size: clamp(1.2rem, 6vw, 1.75rem);
-  }
-
-  #forensic-detail {
-    font-size: .64rem;
-    line-height: 1.2;
+    font-size: .78rem;
   }
 
   #forensic-verdict {
-    padding: 4px 7px;
-    font-size: .58rem;
+    font-size: .45rem;
   }
 }
