@@ -58,6 +58,7 @@
     assistedGoals: 0,
     lastHarmfulAt: -Infinity,
     chain: [],
+    assistChain: [],
     trail: [],
     previous: {
       green: 0,
@@ -105,6 +106,7 @@
     state.assistedGoals = 0;
     state.lastHarmfulAt = -Infinity;
     state.chain = [];
+    state.assistChain = [];
     state.trail = [];
     state.eventSerial = 0;
     clearTimeout(state.reviewTimer);
@@ -124,7 +126,7 @@
   }
 
   function choose(list) {
-    return list[state.cases % list.length];
+    return list[(state.cases - 1) % list.length];
   }
 
   function chainSummary() {
@@ -153,7 +155,10 @@
     state.cases += 1;
     state.eventSerial += 1;
     state.lastHarmfulAt = now;
-    state.chain.push({ type, victim, at: now });
+    const event = { type, victim, at: now };
+    state.chain.push(event);
+    state.assistChain = state.assistChain.filter((item) => now - item.at <= ASSIST_WINDOW_MS);
+    state.assistChain.push(event);
     outputs.combo.value = `x${state.chain.length}`;
     updateForensicCounters();
     scheduleComboExpiry(state.eventSerial);
@@ -178,11 +183,12 @@
 
   function registerAssistedGoal(scorer) {
     const now = performance.now();
-    if (!state.chain.length || now - state.lastHarmfulAt > ASSIST_WINDOW_MS) return;
+    state.assistChain = state.assistChain.filter((event) => now - event.at <= ASSIST_WINDOW_MS);
+    if (!state.assistChain.length || now - state.lastHarmfulAt > ASSIST_WINDOW_MS) return;
 
     state.assistedGoals += 1;
     updateForensicCounters();
-    const combo = state.chain.length;
+    const combo = state.assistChain.length;
     const verdict = combo >= 3 ? `BULLSHIT x${combo} FINISHER` : 'BULLSHIT-ASSISTED GOAL';
     addLog(`${scorer} scored after ${combo} harmful physics ${combo === 1 ? 'offense' : 'offenses'}. ${verdict}.`);
     showReview({
@@ -194,6 +200,7 @@
       freezeMs: 1250
     });
     state.chain = [];
+    state.assistChain = [];
     outputs.combo.value = 'x0';
     clearTimeout(state.comboTimer);
   }
@@ -320,7 +327,7 @@
   function observeExistingBanner() {
     if (!existingBannerTitle || !existingBannerDetail || !existingBanner) return;
     const observer = new MutationObserver(() => {
-      if (!existingBanner.classList.contains('visible')) return;
+      if (!existingBanner.classList.contains('visible') || existingBanner.classList.contains('clean')) return;
       const title = existingBannerTitle.textContent.trim();
       if (!title || title === state.lastBannerTitle) return;
       state.lastBannerTitle = title;
@@ -332,5 +339,5 @@
   captureBall();
   observeExistingBanner();
   updateForensicCounters();
-  window.setInterval(readCounters, 80);
+  window.setInterval(readCounters, 32);
 })();
