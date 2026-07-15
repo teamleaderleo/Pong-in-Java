@@ -28,46 +28,14 @@
         </div>
 
         <div class="bullshit-board" aria-label="Bullshit counters">
-          <div class="stat-card green-stat">
-            <span>GREEN GOT FUCKED</span>
-            <output id="green-phase-count">0</output>
-            <small>paddle phase-throughs</small>
-          </div>
-          <div class="stat-card combo-stat">
-            <span>HARMFUL COMBO</span>
-            <output id="combo-count">x0</output>
-            <small>best <output id="best-combo-count">x0</output></small>
-          </div>
-          <div class="stat-card pink-stat">
-            <span>PINK GOT FUCKED</span>
-            <output id="pink-phase-count">0</output>
-            <small>paddle phase-throughs</small>
-          </div>
-          <div class="stat-card">
-            <span>BLOCK PHASES</span>
-            <output id="blocker-phase-count">0</output>
-            <small>actual pass-throughs</small>
-          </div>
-          <div class="stat-card weird-stat">
-            <span>WEIRD SAVES</span>
-            <output id="weird-bounce-count">0</output>
-            <small>bullshit that helped</small>
-          </div>
-          <div class="stat-card nudge-stat">
-            <span>NUDGES</span>
-            <output id="nudge-count">0</output>
-            <small>bonus movement crimes</small>
-          </div>
-          <div class="stat-card case-stat">
-            <span>FORENSIC CASES</span>
-            <output id="case-count">0</output>
-            <small>serious offenses reviewed</small>
-          </div>
-          <div class="stat-card goal-stat">
-            <span>BS-ASSISTED GOALS</span>
-            <output id="bullshit-goal-count">0</output>
-            <small>points after harmful chains</small>
-          </div>
+          <div class="stat-card green-stat"><span>GREEN GOT FUCKED</span><output id="green-phase-count">0</output><small>paddle phase-throughs</small></div>
+          <div class="stat-card combo-stat"><span>HARMFUL COMBO</span><output id="combo-count">x0</output><small>best <output id="best-combo-count">x0</output></small></div>
+          <div class="stat-card pink-stat"><span>PINK GOT FUCKED</span><output id="pink-phase-count">0</output><small>paddle phase-throughs</small></div>
+          <div class="stat-card"><span>BLOCK PHASES</span><output id="blocker-phase-count">0</output><small>actual pass-throughs</small></div>
+          <div class="stat-card weird-stat"><span>WEIRD SAVES</span><output id="weird-bounce-count">0</output><small>bullshit that helped</small></div>
+          <div class="stat-card nudge-stat"><span>NUDGES</span><output id="nudge-count">0</output><small>bonus movement crimes</small></div>
+          <div class="stat-card case-stat"><span>FORENSIC CASES</span><output id="case-count">0</output><small>serious offenses reviewed</small></div>
+          <div class="stat-card goal-stat"><span>BS-ASSISTED GOALS</span><output id="bullshit-goal-count">0</output><small>points after harmful chains</small></div>
         </div>
 
         <div class="court-stage">
@@ -102,7 +70,7 @@
           </div>
         </div>
 
-        <div class="touch-controls" aria-label="Mobile game controls">
+        <div class="touch-controls" aria-label="Mobile utility controls">
           <div class="touch-paddle green-touch" aria-label="Green paddle controls">
             <span>GREEN</span>
             <div class="touch-pair">
@@ -139,7 +107,7 @@
 
         <section>
           <h2>What gets counted</h2>
-          <p><b>Harmful:</b> paddle and blocker phase-throughs. These build the combo and receive a freeze-frame review.</p>
+          <p><b>Harmful:</b> paddle and blocker phase-throughs. These build the combo and receive a compact forensic callout.</p>
           <p><b>Weird saves:</b> broken reflections that send the ball back into play.</p>
           <p><b>Nudges:</b> oversized visible movement from bonus moves. They stay separate from phase-throughs.</p>
           <p><b>BS-assisted goals:</b> points scored shortly after a harmful chain.</p>
@@ -148,9 +116,10 @@
         <section>
           <h2>Controls</h2>
           <dl class="controls">
-            <div><dt>Green</dt><dd>W / S or touch</dd></div>
-            <div><dt>Pink</dt><dd>↑ / ↓ or touch</dd></div>
-            <div><dt>Serve</dt><dd>Space or tap</dd></div>
+            <div><dt>Green</dt><dd>W / S or left court</dd></div>
+            <div><dt>Pink</dt><dd>↑ / ↓ or right court</dd></div>
+            <div><dt>Solo touch</dt><dd>Hold upper/lower quadrants</dd></div>
+            <div><dt>Serve</dt><dd>Space or first court touch</dd></div>
             <div><dt>Reset</dt><dd>R</dd></div>
             <div><dt>Mode</dt><dd>C</dd></div>
           </dl>
@@ -185,6 +154,7 @@
     </section>
   </main>
 
+  <script src="performance-fixes.js"></script>
   <script src="bullshit-telemetry.js"></script>
   <script src="regression-fixes.js"></script>
   <script src="forensic-replay.js"></script>
