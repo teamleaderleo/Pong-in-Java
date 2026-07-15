@@ -23,7 +23,47 @@
           <span id="status">PRESS SPACE TO SERVE</span>
           <span><b>PINK</b> <output id="pink-score">0</output></span>
         </div>
-        <canvas id="game" width="800" height="800" aria-label="Playable Pong game"></canvas>
+
+        <div class="bullshit-board" aria-label="Bullshit counters">
+          <div class="stat-card green-stat">
+            <span>GREEN GOT FUCKED</span>
+            <output id="green-phase-count">0</output>
+            <small>paddle phase-throughs</small>
+          </div>
+          <div class="stat-card combo-stat">
+            <span>HARMFUL COMBO</span>
+            <output id="combo-count">x0</output>
+            <small>best <output id="best-combo-count">x0</output></small>
+          </div>
+          <div class="stat-card pink-stat">
+            <span>PINK GOT FUCKED</span>
+            <output id="pink-phase-count">0</output>
+            <small>paddle phase-throughs</small>
+          </div>
+          <div class="stat-card">
+            <span>BLOCK PHASES</span>
+            <output id="blocker-phase-count">0</output>
+            <small>actual pass-throughs</small>
+          </div>
+          <div class="stat-card weird-stat">
+            <span>WEIRD SAVES</span>
+            <output id="weird-bounce-count">0</output>
+            <small>bullshit that helped</small>
+          </div>
+          <div class="stat-card nudge-stat">
+            <span>NUDGES</span>
+            <output id="nudge-count">0</output>
+            <small>bonus movement crimes</small>
+          </div>
+        </div>
+
+        <div class="court-stage">
+          <canvas id="game" width="800" height="800" aria-label="Playable Pong game"></canvas>
+          <div id="bullshit-banner" class="bullshit-banner" aria-live="assertive" aria-atomic="true">
+            <strong id="bullshit-banner-title"></strong>
+            <span id="bullshit-banner-detail"></span>
+          </div>
+        </div>
 
         <div class="touch-controls" aria-label="Mobile game controls">
           <div class="touch-paddle green-touch" aria-label="Green paddle controls">
@@ -57,7 +97,14 @@
             <button id="chaos-mode" class="active" type="button">Legacy Chaos</button>
             <button id="clean-mode" type="button">Responsible Physics</button>
           </div>
-          <p id="mode-copy">Integer coordinates. Collision checks after movement. Secret dead lines. Bonus movement during bounces. An authentic little disaster.</p>
+          <p id="mode-copy">Integer coordinates. Collision checks after movement. Secret dead lines. Bonus movement during bounces. Full bullshit telemetry enabled.</p>
+        </section>
+
+        <section>
+          <h2>What gets counted</h2>
+          <p><b>Harmful:</b> paddle and blocker phase-throughs. These build the combo.</p>
+          <p><b>Weird saves:</b> broken reflections that send the ball back into play.</p>
+          <p><b>Nudges:</b> oversized visible movement from bonus moves. They stay separate from phase-throughs.</p>
         </section>
 
         <section>
@@ -72,7 +119,14 @@
         </section>
 
         <section>
-          <h2>Live incident report</h2>
+          <h2>Detected bullshit</h2>
+          <ol id="telemetry-log" class="incident-log telemetry-log" aria-live="assertive">
+            <li>Visual bullshit detector armed.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2>Raw incident report</h2>
           <ol id="incident-log" class="incident-log" aria-live="polite">
             <li>Awaiting the first collision felony.</li>
           </ol>
@@ -93,6 +147,7 @@
     </section>
   </main>
 
+  <script src="bullshit-telemetry.js"></script>
   <script src="app.js"></script>
   <script src="mobile-controls.js"></script>
 </body>
