@@ -4,162 +4,871 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07070a">
-  <meta name="description" content="A browser port of an old Processing Pong game, including its beloved collision crimes.">
+  <meta name="description" content="Pong: Forensic Chaos Edition">
   <title>Pong: Forensic Chaos Edition</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="forensic-replay.css">
-  <link rel="stylesheet" href="forensic-animation.css">
-  <link rel="stylesheet" href="regression-fixes.css">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07070a;
+      --panel: #111118;
+      --panel-2: #171720;
+      --line: rgba(255,255,255,.12);
+      --ink: #f6f3ed;
+      --muted: #aaa8b2;
+      --green: #84f5b5;
+      --pink: #f584c4;
+      --blue: #4dd2ff;
+      --yellow: #ffe58f;
+      --red: #ff5d7d;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); }
+    body {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overscroll-behavior: none;
+    }
+    button { font: inherit; }
+    .shell { width: min(1180px, calc(100% - 20px)); margin: 0 auto; padding: 18px 0 28px; }
+    .hero { margin-bottom: 14px; }
+    .eyebrow { margin: 0 0 6px; color: var(--blue); font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 3.7rem); line-height: .95; letter-spacing: -.055em; }
+    .lede { max-width: 780px; margin: 9px 0 0; color: var(--muted); line-height: 1.45; }
+    .layout { display: grid; grid-template-columns: minmax(0, 820px) minmax(250px, 1fr); gap: 14px; align-items: start; }
+    .cabinet, .panel { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; }
+    .scoreboard {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center;
+      padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: .83rem;
+    }
+    .scoreboard span:last-child { text-align: right; }
+    .scoreboard output { font-size: 1.2rem; font-weight: 900; }
+    #green-score { color: var(--green); }
+    #pink-score { color: var(--pink); }
+    #status { color: var(--muted); text-align: center; }
+    .stats {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-bottom: 1px solid var(--line);
+    }
+    .stat { min-width: 0; padding: 7px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stat:nth-child(4n) { border-right: 0; }
+    .stat:nth-last-child(-n + 4) { border-bottom: 0; }
+    .stat span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; }
+    .stat output { display: block; margin-top: 2px; font-size: 1.25rem; font-weight: 950; }
+    .stat.green output { color: var(--green); }
+    .stat.pink output { color: var(--pink); }
+    .stat.weird output { color: var(--yellow); }
+    .stat.nudge output { color: var(--blue); }
+    .court-wrap { position: relative; aspect-ratio: 1; background: #000; touch-action: none; user-select: none; }
+    canvas { display: block; width: 100%; height: 100%; background: #000; touch-action: none; }
+    .alert {
+      position: absolute; top: 8px; left: 8px; z-index: 3;
+      max-width: min(68%, 380px); padding: 6px 8px;
+      border: 1px solid rgba(255,93,125,.65); border-radius: 7px;
+      background: rgba(7,7,10,.82); box-shadow: 0 3px 15px rgba(0,0,0,.4);
+      opacity: 0; transform: translateY(-4px); pointer-events: none;
+      transition: opacity 90ms linear, transform 90ms linear;
+    }
+    .alert.visible { opacity: 1; transform: none; }
+    .alert strong { display: block; color: var(--red); font-size: .82rem; line-height: 1.05; }
+    .alert span { display: block; margin-top: 2px; color: var(--ink); font-size: .58rem; line-height: 1.2; }
+    .utility {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px;
+      padding: 8px; border-top: 1px solid var(--line); background: #0d0d13;
+    }
+    button {
+      min-height: 42px; border: 1px solid var(--line); border-radius: 7px;
+      background: var(--panel-2); color: var(--ink); cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active, button.pressed { transform: translateY(1px); background: var(--ink); color: #08080b; }
+    .serve { color: var(--blue); border-color: rgba(77,210,255,.45); }
+    .panel section { padding: 14px; border-bottom: 1px solid var(--line); }
+    .panel section:last-child { border-bottom: 0; }
+    h2 { margin: 0 0 10px; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; }
+    .mode { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .mode button.active { background: var(--ink); color: #08080b; }
+    .copy { margin: 10px 0 0; color: var(--muted); font-size: .75rem; line-height: 1.45; }
+    .controls { display: grid; gap: 7px; font-size: .75rem; }
+    .controls div { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 6px; border-bottom: 1px dashed var(--line); }
+    .controls div:last-child { border-bottom: 0; padding-bottom: 0; }
+    .controls b { color: var(--muted); font-weight: 500; }
+    .log { margin: 0; padding-left: 20px; max-height: 230px; overflow: auto; }
+    .log li { padding: 4px 0; color: var(--muted); font-size: .7rem; line-height: 1.35; }
+    .log li.harmful { color: #ff91a7; font-weight: 800; }
+    .log li.weird { color: var(--yellow); }
+    .log li.nudge { color: #9ceaff; }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel { display: none; }
+      .shell { width: min(100% - 10px, 820px); padding-top: max(8px, env(safe-area-inset-top)); }
+      .hero { margin-bottom: 8px; }
+      .lede { display: none; }
+      .stats {
+        display: flex; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+      }
+      .stats::-webkit-scrollbar { display: none; }
+      .stat { flex: 0 0 88px; border-bottom: 0; padding: 5px 6px; }
+      .stat:nth-child(4n) { border-right: 1px solid var(--line); }
+      .stat:last-child { border-right: 0; }
+      .stat span { font-size: .45rem; }
+      .stat output { font-size: 1rem; }
+      .scoreboard { padding: 7px 9px; font-size: .68rem; }
+      .scoreboard output { font-size: 1rem; }
+      .alert { max-width: 62%; }
+      .utility { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+    }
+    @media (orientation: landscape) and (max-height: 650px) and (pointer: coarse) {
+      .shell { width: min(100%, 100vh); padding: 0; }
+      .hero { display: none; }
+      .cabinet { border-radius: 0; border-top: 0; border-bottom: 0; }
+      .scoreboard { min-height: 32px; padding: 3px 8px; }
+      .stats { height: 34px; }
+      .stat { flex-basis: 82px; padding: 3px 5px; }
+      .stat output { font-size: .85rem; }
+      .court-wrap { height: calc(100vh - 108px); width: auto; margin: 0 auto; }
+      canvas { width: auto; height: 100%; margin: 0 auto; }
+      .utility { min-height: 42px; padding: 3px 6px; }
+      .utility button { min-height: 36px; }
+    }
+  </style>
 </head>
 <body>
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">teamleaderleo / Pong-in-Java</p>
       <h1>Pong: Forensic Chaos Edition</h1>
-      <p class="lede">A browser port of the 2015 Processing game, with its collision crimes preserved as an interactive museum exhibit.</p>
+      <p class="lede">The collision crimes are preserved, but the browser build is now one self-contained file with no external runtime dependencies.</p>
     </header>
 
-    <section class="game-layout" aria-label="Pong game">
-      <div class="cabinet" id="game-cabinet">
-        <div class="scoreboard" aria-live="polite">
+    <section class="layout">
+      <div class="cabinet" id="cabinet">
+        <div class="scoreboard">
           <span><b>GREEN</b> <output id="green-score">0</output></span>
           <span id="status">PRESS SPACE TO SERVE</span>
           <span><b>PINK</b> <output id="pink-score">0</output></span>
         </div>
 
-        <div class="bullshit-board" aria-label="Bullshit counters">
-          <div class="stat-card green-stat"><span>GREEN GOT FUCKED</span><output id="green-phase-count">0</output><small>paddle phase-throughs</small></div>
-          <div class="stat-card combo-stat"><span>HARMFUL COMBO</span><output id="combo-count">x0</output><small>best <output id="best-combo-count">x0</output></small></div>
-          <div class="stat-card pink-stat"><span>PINK GOT FUCKED</span><output id="pink-phase-count">0</output><small>paddle phase-throughs</small></div>
-          <div class="stat-card"><span>BLOCK PHASES</span><output id="blocker-phase-count">0</output><small>actual pass-throughs</small></div>
-          <div class="stat-card weird-stat"><span>WEIRD SAVES</span><output id="weird-bounce-count">0</output><small>bullshit that helped</small></div>
-          <div class="stat-card nudge-stat"><span>NUDGES</span><output id="nudge-count">0</output><small>bonus movement crimes</small></div>
-          <div class="stat-card case-stat"><span>FORENSIC CASES</span><output id="case-count">0</output><small>serious offenses reviewed</small></div>
-          <div class="stat-card goal-stat"><span>BS-ASSISTED GOALS</span><output id="bullshit-goal-count">0</output><small>points after harmful chains</small></div>
+        <div class="stats" aria-label="Bullshit counters">
+          <div class="stat green"><span>Green fucked</span><output id="green-phase">0</output></div>
+          <div class="stat"><span>Combo / best</span><output id="combo">x0 / x0</output></div>
+          <div class="stat pink"><span>Pink fucked</span><output id="pink-phase">0</output></div>
+          <div class="stat"><span>Block phases</span><output id="block-phase">0</output></div>
+          <div class="stat weird"><span>Weird saves</span><output id="weird">0</output></div>
+          <div class="stat nudge"><span>Nudges</span><output id="nudges">0</output></div>
+          <div class="stat"><span>Cases</span><output id="cases">0</output></div>
+          <div class="stat"><span>BS goals</span><output id="assists">0</output></div>
         </div>
 
-        <div class="court-stage">
+        <div class="court-wrap">
           <canvas id="game" width="800" height="800" aria-label="Playable Pong game"></canvas>
-          <div id="bullshit-banner" class="bullshit-banner" aria-live="assertive" aria-atomic="true">
-            <strong id="bullshit-banner-title"></strong>
-            <span id="bullshit-banner-detail"></span>
-          </div>
-
-          <div id="forensic-review" class="forensic-review" aria-live="assertive" aria-atomic="true">
-            <svg class="forensic-evidence" viewBox="0 0 800 800" preserveAspectRatio="none" aria-hidden="true">
-              <defs>
-                <marker id="forensic-arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-                  <path d="M0,0 L12,6 L0,12 Z" fill="#fff59d"></path>
-                </marker>
-              </defs>
-              <polyline id="forensic-path"></polyline>
-              <line id="forensic-arrow"></line>
-              <circle id="forensic-impact" r="34"></circle>
-              <line id="forensic-cross-a" class="forensic-cross"></line>
-              <line id="forensic-cross-b" class="forensic-cross"></line>
-              <circle id="forensic-replay-ball" r="10">
-                <animateMotion id="forensic-motion" begin="indefinite" fill="freeze"></animateMotion>
-              </circle>
-            </svg>
-            <div class="forensic-review-card">
-              <span id="forensic-case">PHYSICS REVIEW</span>
-              <strong id="forensic-title"></strong>
-              <span id="forensic-detail"></span>
-              <span id="forensic-verdict"></span>
-            </div>
+          <div class="alert" id="alert" aria-live="assertive">
+            <strong id="alert-title"></strong>
+            <span id="alert-detail"></span>
           </div>
         </div>
 
-        <div class="touch-controls" aria-label="Mobile utility controls">
-          <div class="touch-paddle green-touch" aria-label="Green paddle controls">
-            <span>GREEN</span>
-            <div class="touch-pair">
-              <button type="button" data-hold-key="w" aria-label="Move green paddle up">▲</button>
-              <button type="button" data-hold-key="s" aria-label="Move green paddle down">▼</button>
-            </div>
-          </div>
-
-          <div class="touch-actions">
-            <button type="button" data-tap-key="Space" class="serve-button">SERVE</button>
-            <button type="button" data-tap-key="r">RESET</button>
-            <button type="button" id="fullscreen-button">FULLSCREEN</button>
-          </div>
-
-          <div class="touch-paddle pink-touch" aria-label="Pink paddle controls">
-            <span>PINK</span>
-            <div class="touch-pair">
-              <button type="button" data-hold-key="ArrowUp" aria-label="Move pink paddle up">▲</button>
-              <button type="button" data-hold-key="ArrowDown" aria-label="Move pink paddle down">▼</button>
-            </div>
-          </div>
+        <div class="utility">
+          <button class="serve" id="serve">SERVE</button>
+          <button id="reset">RESET</button>
+          <button id="fullscreen">FULLSCREEN</button>
         </div>
       </div>
 
       <aside class="panel">
         <section>
-          <h2>Physics personality</h2>
-          <div class="mode-switch" role="group" aria-label="Physics mode">
-            <button id="chaos-mode" class="active" type="button">Legacy Chaos</button>
-            <button id="clean-mode" type="button">Responsible Physics</button>
+          <h2>Physics mode</h2>
+          <div class="mode">
+            <button id="chaos" class="active">Legacy Chaos</button>
+            <button id="clean">Responsible Physics</button>
           </div>
-          <p id="mode-copy">Integer coordinates. Collision checks after movement. Secret dead lines. Bonus movement during bounces. Full bullshit telemetry enabled.</p>
+          <p class="copy" id="mode-copy">Integer coordinates, post-move collision checks, dead lines, bonus movement, and blocker logic with several outstanding warrants.</p>
         </section>
-
-        <section>
-          <h2>What gets counted</h2>
-          <p><b>Harmful:</b> paddle and blocker phase-throughs. These build the combo and receive a compact forensic callout.</p>
-          <p><b>Weird saves:</b> broken reflections that send the ball back into play.</p>
-          <p><b>Nudges:</b> oversized visible movement from bonus moves. They stay separate from phase-throughs.</p>
-          <p><b>BS-assisted goals:</b> points scored shortly after a harmful chain.</p>
-        </section>
-
         <section>
           <h2>Controls</h2>
-          <dl class="controls">
-            <div><dt>Green</dt><dd>W / S or left court</dd></div>
-            <div><dt>Pink</dt><dd>↑ / ↓ or right court</dd></div>
-            <div><dt>Solo touch</dt><dd>Hold upper/lower quadrants</dd></div>
-            <div><dt>Serve</dt><dd>Space or first court touch</dd></div>
-            <div><dt>Reset</dt><dd>R</dd></div>
-            <div><dt>Mode</dt><dd>C</dd></div>
-          </dl>
+          <div class="controls">
+            <div><b>Green</b><span>W / S or left court</span></div>
+            <div><b>Pink</b><span>↑ / ↓ or right court</span></div>
+            <div><b>Solo touch</b><span>Hold upper/lower quadrants</span></div>
+            <div><b>Serve</b><span>Space or first court touch</span></div>
+            <div><b>Reset</b><span>R</span></div>
+            <div><b>Mode</b><span>C</span></div>
+          </div>
         </section>
-
         <section>
           <h2>Detected bullshit</h2>
-          <ol id="telemetry-log" class="incident-log telemetry-log" aria-live="assertive">
-            <li>Visual bullshit detector armed.</li>
-          </ol>
-        </section>
-
-        <section>
-          <h2>Raw incident report</h2>
-          <ol id="incident-log" class="incident-log" aria-live="polite">
-            <li>Awaiting the first collision felony.</li>
-          </ol>
+          <ol class="log" id="log"><li>Integrated detector armed. No polling, no observers, no CDN.</li></ol>
         </section>
       </aside>
     </section>
-
-    <section class="museum">
-      <h2>Known exhibits</h2>
-      <div class="cards">
-        <article><h3>The Integer Wood Chipper</h3><p>Trigonometry enters as a decimal and leaves missing pieces.</p></article>
-        <article><h3>The Paddle Dead Lines</h3><p>Four exact Y coordinates belong to no collision zone whatsoever.</p></article>
-        <article><h3>The 2.5× Collision Frame</h3><p>Move once, bounce, move again, then half-move for luck.</p></article>
-        <article><h3>The Obstacle Coin Toss</h3><p>Two blockers can reverse the same angle twice and call it physics.</p></article>
-        <article><h3>Zeus Balancing</h3><p>Green occasionally receives divine competitive intervention.</p></article>
-        <article><h3>Actual Topspin</h3><p>Clean mode adds paddle velocity to the outgoing ball instead of merely checking whether a key exists.</p></article>
-      </div>
-    </section>
   </main>
 
-  <script src="performance-fixes.js"></script>
-  <script src="bullshit-telemetry.js"></script>
-  <script src="regression-fixes.js"></script>
-  <script src="forensic-replay.js"></script>
-  <script src="forensic-animation.js"></script>
-  <script src="app.js"></script>
-  <script src="mobile-controls.js"></script>
+  <script>
+  (() => {
+    'use strict';
+
+    const WIDTH = 800;
+    const HEIGHT = 800;
+    const BALL_SIZE = 6;
+    const PADDLE_WIDTH = 10;
+    const PADDLE_HEIGHT = 140;
+    const PADDLE_SPEED = 9;
+    const BALL_SPEED = 9;
+    const COMBO_WINDOW = 4000;
+    const ASSIST_WINDOW = 6500;
+    const MAX_LOG = 12;
+
+    const canvas = document.querySelector('#game');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const cabinet = document.querySelector('#cabinet');
+    const status = document.querySelector('#status');
+    const log = document.querySelector('#log');
+    const alertBox = document.querySelector('#alert');
+    const alertTitle = document.querySelector('#alert-title');
+    const alertDetail = document.querySelector('#alert-detail');
+    const chaosButton = document.querySelector('#chaos');
+    const cleanButton = document.querySelector('#clean');
+    const modeCopy = document.querySelector('#mode-copy');
+
+    const ui = {
+      greenScore: document.querySelector('#green-score'),
+      pinkScore: document.querySelector('#pink-score'),
+      greenPhase: document.querySelector('#green-phase'),
+      pinkPhase: document.querySelector('#pink-phase'),
+      blockPhase: document.querySelector('#block-phase'),
+      weird: document.querySelector('#weird'),
+      nudges: document.querySelector('#nudges'),
+      combo: document.querySelector('#combo'),
+      cases: document.querySelector('#cases'),
+      assists: document.querySelector('#assists')
+    };
+
+    class Pong {
+      constructor() {
+        this.keys = new Set();
+        this.pointerKeys = new Map();
+        this.mode = 'chaos';
+        this.scores = { green: 0, pink: 0 };
+        this.stats = {
+          greenPhase: 0,
+          pinkPhase: 0,
+          blockPhase: 0,
+          weird: 0,
+          nudges: 0,
+          combo: 0,
+          bestCombo: 0,
+          cases: 0,
+          assists: 0,
+          lastHarmfulAt: -Infinity
+        };
+        this.incidents = [];
+        this.alertTimer = 0;
+        this.lastTime = performance.now();
+        this.accumulator = 0;
+        this.stepMs = 1000 / 60;
+        this.frameEvents = [];
+        this.lastScoredAt = -Infinity;
+        this.lastHarmfulLabel = '';
+        this.resetRound();
+        this.bind();
+        this.renderHud();
+        requestAnimationFrame((t) => this.loop(t));
+      }
+
+      randomServeAngle() {
+        const degrees = 25 + Math.random() * 40;
+        return Math.random() < .5 ? degrees : 180 - degrees;
+      }
+
+      resetRound() {
+        this.green = { x: 25, y: 400, vy: 0, color: '#84f5b5' };
+        this.pink = { x: 775, y: 400, vy: 0, color: '#f584c4' };
+        this.blockers = [
+          { x: 400, y: 200, width: 200, height: 12 },
+          { x: 400, y: 600, width: 200, height: 12 }
+        ];
+        this.ball = {
+          x: 400, y: 400, previousX: 400, previousY: 400,
+          vx: 0, vy: 0, speed: 0, angle: this.randomServeAngle(), active: false
+        };
+        this.frameEvents = [];
+        this.hideAlert();
+        this.renderHud();
+      }
+
+      resetGame() {
+        this.scores = { green: 0, pink: 0 };
+        Object.assign(this.stats, {
+          greenPhase: 0, pinkPhase: 0, blockPhase: 0, weird: 0,
+          nudges: 0, combo: 0, bestCombo: 0, cases: 0, assists: 0,
+          lastHarmfulAt: -Infinity
+        });
+        this.incidents = [];
+        this.resetRound();
+        this.report('Evidence cleared. Physics remains under investigation.', 'neutral');
+      }
+
+      bind() {
+        window.addEventListener('keydown', (event) => {
+          const key = this.normalizeKey(event);
+          if (['ArrowUp','ArrowDown','Space'].includes(key)) event.preventDefault();
+          this.keys.add(key);
+          if (key === 'Space') this.serve();
+          if (key === 'r') this.resetGame();
+          if (key === 'c') this.setMode(this.mode === 'chaos' ? 'clean' : 'chaos');
+          if (this.mode === 'chaos' && ['w','s','ArrowUp','ArrowDown'].includes(key)) this.setLegacySpeed(BALL_SPEED);
+        });
+        window.addEventListener('keyup', (event) => this.keys.delete(this.normalizeKey(event)));
+        window.addEventListener('blur', () => this.releaseAllPointers());
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) this.releaseAllPointers();
+        });
+
+        document.querySelector('#serve').addEventListener('click', () => this.serve());
+        document.querySelector('#reset').addEventListener('click', () => this.resetGame());
+        chaosButton.addEventListener('click', () => this.setMode('chaos'));
+        cleanButton.addEventListener('click', () => this.setMode('clean'));
+        document.querySelector('#fullscreen').addEventListener('click', () => this.toggleFullscreen());
+
+        canvas.addEventListener('pointerdown', (event) => this.beginCourtPointer(event));
+        canvas.addEventListener('pointermove', (event) => this.moveCourtPointer(event));
+        canvas.addEventListener('pointerup', (event) => this.endCourtPointer(event));
+        canvas.addEventListener('pointercancel', (event) => this.endCourtPointer(event));
+        canvas.addEventListener('lostpointercapture', (event) => this.endCourtPointer(event));
+        canvas.addEventListener('contextmenu', (event) => event.preventDefault());
+      }
+
+      normalizeKey(event) {
+        if (event.code === 'Space') return 'Space';
+        if (event.key.startsWith('Arrow')) return event.key;
+        return event.key.toLowerCase();
+      }
+
+      keyForPoint(event) {
+        const rect = canvas.getBoundingClientRect();
+        const left = event.clientX - rect.left < rect.width / 2;
+        const upper = event.clientY - rect.top < rect.height / 2;
+        if (left) return upper ? 'w' : 's';
+        return upper ? 'ArrowUp' : 'ArrowDown';
+      }
+
+      beginCourtPointer(event) {
+        if (event.pointerType === 'mouse') return;
+        event.preventDefault();
+        canvas.setPointerCapture?.(event.pointerId);
+        if (!this.ball.active) this.serve();
+        const key = this.keyForPoint(event);
+        this.pointerKeys.set(event.pointerId, key);
+        this.keys.add(key);
+        if (this.mode === 'chaos') this.setLegacySpeed(BALL_SPEED);
+      }
+
+      moveCourtPointer(event) {
+        const prior = this.pointerKeys.get(event.pointerId);
+        if (!prior) return;
+        event.preventDefault();
+        const next = this.keyForPoint(event);
+        if (next === prior) return;
+        this.keys.delete(prior);
+        this.pointerKeys.set(event.pointerId, next);
+        this.keys.add(next);
+        if (this.mode === 'chaos') this.setLegacySpeed(BALL_SPEED);
+      }
+
+      endCourtPointer(event) {
+        const key = this.pointerKeys.get(event.pointerId);
+        if (!key) return;
+        event.preventDefault();
+        this.pointerKeys.delete(event.pointerId);
+        if (![...this.pointerKeys.values()].includes(key)) this.keys.delete(key);
+      }
+
+      releaseAllPointers() {
+        for (const key of this.pointerKeys.values()) this.keys.delete(key);
+        this.pointerKeys.clear();
+      }
+
+      async toggleFullscreen() {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+            return;
+          }
+          await cabinet.requestFullscreen?.({ navigationUI: 'hide' });
+          try { await screen.orientation?.lock?.('landscape'); } catch {}
+        } catch {
+          cabinet.scrollIntoView({ block: 'start' });
+        }
+      }
+
+      setMode(mode) {
+        if (this.mode === mode) return;
+        this.mode = mode;
+        chaosButton.classList.toggle('active', mode === 'chaos');
+        cleanButton.classList.toggle('active', mode === 'clean');
+        modeCopy.textContent = mode === 'chaos'
+          ? 'Integer coordinates, post-move collision checks, dead lines, bonus movement, and blocker logic with several outstanding warrants.'
+          : 'Floating-point positions, swept paddle collisions, one movement per frame, and actual paddle-velocity spin.';
+        this.resetRound();
+        this.report(mode === 'chaos' ? 'Legacy Chaos resumed committing crimes.' : 'Responsible Physics has entered the building.', 'neutral');
+      }
+
+      serve() {
+        if (this.ball.active) return;
+        this.ball.active = true;
+        this.ball.speed = BALL_SPEED;
+        this.setBallFromAngle(this.ball.angle, BALL_SPEED);
+        this.renderHud();
+      }
+
+      setBallFromAngle(angle, speed = this.ball.speed || BALL_SPEED) {
+        this.ball.angle = angle;
+        const radians = angle * Math.PI / 180;
+        this.ball.vx = speed * Math.cos(radians);
+        this.ball.vy = speed * Math.sin(radians);
+        this.ball.speed = speed;
+      }
+
+      setLegacySpeed(speed) {
+        this.ball.speed = speed;
+        if (this.ball.active) this.setBallFromAngle(this.ball.angle, speed);
+      }
+
+      loop(time) {
+        const frame = Math.min(80, time - this.lastTime);
+        this.lastTime = time;
+        this.accumulator += frame;
+        while (this.accumulator >= this.stepMs) {
+          this.update();
+          this.accumulator -= this.stepMs;
+        }
+        this.draw();
+        requestAnimationFrame((next) => this.loop(next));
+      }
+
+      update() {
+        this.updatePaddles();
+        if (!this.ball.active) {
+          this.renderHud();
+          return;
+        }
+
+        this.frameEvents = [];
+        const before = { x: this.ball.x, y: this.ball.y, vx: this.ball.vx, vy: this.ball.vy };
+
+        if (this.mode === 'chaos') this.updateChaos();
+        else this.updateClean();
+
+        if (!this.ball.active) return;
+        this.detectIntegratedBullshit(before);
+        this.checkScore();
+        this.renderHud();
+      }
+
+      updatePaddles() {
+        this.green.vy = (this.keys.has('s') ? PADDLE_SPEED : 0) - (this.keys.has('w') ? PADDLE_SPEED : 0);
+        this.pink.vy = (this.keys.has('ArrowDown') ? PADDLE_SPEED : 0) - (this.keys.has('ArrowUp') ? PADDLE_SPEED : 0);
+        this.green.y = this.clamp(this.green.y + this.green.vy, PADDLE_HEIGHT/2, HEIGHT-PADDLE_HEIGHT/2);
+        this.pink.y = this.clamp(this.pink.y + this.pink.vy, PADDLE_HEIGHT/2, HEIGHT-PADDLE_HEIGHT/2);
+      }
+
+      updateChaos() {
+        this.ball.previousX = this.ball.x;
+        this.ball.previousY = this.ball.y;
+        this.legacyMove(1);
+        this.legacyWallBounce();
+        this.legacyBlockerBounces();
+
+        if (this.green.vy !== 0) this.legacyMovingPaddleCollision(this.green, 'green');
+        if (this.pink.vy !== 0) this.legacyMovingPaddleCollision(this.pink, 'pink');
+
+        const embedded = (this.legacyBallInsideGreen() && this.green.vy !== 0)
+          || (this.legacyBallInsidePink() && this.pink.vy !== 0);
+
+        if (embedded) {
+          this.legacyMove(.5);
+          this.frameEvents.push({ type: 'bonus-move', object: 'paddle' });
+        } else {
+          this.legacyRegularCollision(this.green, 'green');
+          this.legacyRegularCollision(this.pink, 'pink');
+        }
+      }
+
+      legacyMove(multiplier) {
+        this.ball.x = Math.trunc(this.ball.x + this.ball.vx * multiplier);
+        this.ball.y = Math.trunc(this.ball.y + this.ball.vy * multiplier);
+      }
+
+      legacyWallBounce() {
+        if (this.ball.y > HEIGHT || this.ball.y < 0) {
+          this.setBallFromAngle(360 - this.ball.angle);
+          this.frameEvents.push({ type: 'bounce', object: 'wall' });
+        }
+      }
+
+      legacyMovingPaddleCollision(paddle, side) {
+        const halfBall = BALL_SIZE / 2;
+        const overlap = side === 'green'
+          ? this.ball.x - halfBall <= paddle.x + PADDLE_WIDTH/2 && this.ball.x >= paddle.x - PADDLE_WIDTH/2
+          : this.ball.x + halfBall >= paddle.x - PADDLE_WIDTH/2 && this.ball.x <= paddle.x + PADDLE_WIDTH/2;
+        if (!overlap) return;
+
+        const zone = this.legacyZone(paddle);
+        if (zone === null) {
+          this.frameEvents.push({ type: 'dead-line', object: 'paddle', side });
+          return;
+        }
+
+        if (zone.name === 'mid') {
+          this.setBallFromAngle(180 - this.ball.angle);
+          this.frameEvents.push({ type: 'bounce', object: 'paddle', side });
+          return;
+        }
+
+        this.setBallFromAngle(this.legacyAngleForZone(side, zone));
+        this.frameEvents.push({ type: 'bounce', object: 'paddle', side });
+
+        const skipBonus = side === 'pink' && zone.name === 'top' && zone.bucket === 0;
+        if (!skipBonus) {
+          this.legacyMove(1);
+          this.frameEvents.push({ type: 'bonus-move', object: 'paddle', side });
+        }
+      }
+
+      legacyZone(paddle) {
+        const y = this.ball.y;
+        const top = paddle.y - PADDLE_HEIGHT/2;
+        const bottom = paddle.y + PADDLE_HEIGHT/2;
+        if (y < paddle.y - 10 && y > top) return { name: 'top', bucket: Math.trunc((y - paddle.y + 10)/10) };
+        if (y > paddle.y + 10 && y < bottom) return { name: 'bottom', bucket: Math.trunc((y - paddle.y - 10)/10) };
+        if (y > paddle.y - 10 && y < paddle.y + 10) return { name: 'mid', bucket: 0 };
+        return null;
+      }
+
+      legacyAngleForZone(side, zone) {
+        const bucket = this.clamp(Math.abs(zone.bucket), 0, 5);
+        const degree = 20 + bucket * 10;
+        if (side === 'green') return zone.name === 'top' ? -degree : degree;
+        return zone.name === 'top' ? 180 + degree : 180 - degree;
+      }
+
+      legacyRegularCollision(paddle, side) {
+        const halfBall = BALL_SIZE / 2;
+        const insideY = this.ball.y > paddle.y-PADDLE_HEIGHT/2 && this.ball.y < paddle.y+PADDLE_HEIGHT/2;
+        const insideX = side === 'green'
+          ? this.ball.x-halfBall <= paddle.x+PADDLE_WIDTH/2 && this.ball.x >= paddle.x-PADDLE_WIDTH/2
+          : this.ball.x+halfBall >= paddle.x-PADDLE_WIDTH/2 && this.ball.x <= paddle.x+PADDLE_WIDTH/2;
+        if (insideX && insideY) {
+          this.setBallFromAngle(180 - this.ball.angle);
+          this.frameEvents.push({ type: 'bounce', object: 'paddle', side });
+        }
+      }
+
+      legacyBallInsideGreen() {
+        return this.ball.x - BALL_SIZE < this.green.x - PADDLE_WIDTH/2 && this.withinPaddleY(this.green);
+      }
+
+      legacyBallInsidePink() {
+        return this.ball.x + BALL_SIZE > this.pink.x + PADDLE_WIDTH/2 && this.withinPaddleY(this.pink);
+      }
+
+      withinPaddleY(paddle) {
+        return this.ball.y > paddle.y-PADDLE_HEIGHT/2 && this.ball.y < paddle.y+PADDLE_HEIGHT/2;
+      }
+
+      legacyBlockerBounces() {
+        for (const blocker of this.blockers) {
+          const overlapX = this.ball.x-BALL_SIZE/2 <= blocker.x+blocker.width/2
+            && this.ball.x+BALL_SIZE/2 >= blocker.x-blocker.width/2;
+          const insideBand = this.ball.y > blocker.y-blocker.height/2 && this.ball.y < blocker.y+blocker.height/2;
+
+          if (overlapX && !insideBand) {
+            this.setBallFromAngle(360 - this.ball.angle);
+            this.frameEvents.push({ type: 'bounce', object: 'blocker' });
+          }
+          if (this.ball.x > blocker.x+blocker.width/2-9 || this.ball.x < blocker.x-blocker.width/2+9) {
+            this.setBallFromAngle(180 - this.ball.angle);
+            this.frameEvents.push({ type: 'bounce', object: 'blocker' });
+          }
+        }
+      }
+
+      updateClean() {
+        const ball = this.ball;
+        ball.previousX = ball.x;
+        ball.previousY = ball.y;
+
+        let nextX = ball.x + ball.vx;
+        let nextY = ball.y + ball.vy;
+
+        if (nextY-BALL_SIZE/2 <= 0 || nextY+BALL_SIZE/2 >= HEIGHT) {
+          ball.vy *= -1;
+          nextY = this.clamp(nextY, BALL_SIZE/2, HEIGHT-BALL_SIZE/2);
+        }
+
+        const hit = this.cleanPaddleHit(nextX, nextY);
+        if (hit) {
+          const paddle = hit.side === 'green' ? this.green : this.pink;
+          this.applyCleanPaddleBounce(paddle, hit.side, hit.contactY);
+          nextX = hit.side === 'green'
+            ? paddle.x+PADDLE_WIDTH/2+BALL_SIZE/2
+            : paddle.x-PADDLE_WIDTH/2-BALL_SIZE/2;
+          nextY = this.clamp(hit.contactY, BALL_SIZE/2, HEIGHT-BALL_SIZE/2);
+        }
+
+        const blocker = this.cleanBlockerHit(nextX, nextY);
+        if (blocker) {
+          if (blocker.axis === 'y') ball.vy *= -1;
+          else ball.vx *= -1;
+          nextX = ball.x + ball.vx;
+          nextY = ball.y + ball.vy;
+        }
+
+        ball.x = nextX;
+        ball.y = nextY;
+        ball.angle = Math.atan2(ball.vy, ball.vx) * 180 / Math.PI;
+      }
+
+      cleanPaddleHit(nextX, nextY) {
+        const halfBall = BALL_SIZE/2;
+        const candidates = [
+          { side: 'green', paddle: this.green, face: this.green.x+PADDLE_WIDTH/2, approaching: this.ball.vx < 0 },
+          { side: 'pink', paddle: this.pink, face: this.pink.x-PADDLE_WIDTH/2, approaching: this.ball.vx > 0 }
+        ];
+        for (const c of candidates) {
+          if (!c.approaching) continue;
+          const crossed = c.side === 'green'
+            ? this.ball.x-halfBall >= c.face && nextX-halfBall <= c.face
+            : this.ball.x+halfBall <= c.face && nextX+halfBall >= c.face;
+          if (!crossed) continue;
+          const denom = nextX-this.ball.x;
+          const t = denom === 0 ? 0 : (c.face-this.ball.x)/denom;
+          const contactY = this.ball.y + (nextY-this.ball.y)*this.clamp(t,0,1);
+          if (contactY+halfBall >= c.paddle.y-PADDLE_HEIGHT/2 && contactY-halfBall <= c.paddle.y+PADDLE_HEIGHT/2) {
+            return { side: c.side, contactY };
+          }
+        }
+        return null;
+      }
+
+      applyCleanPaddleBounce(paddle, side, contactY) {
+        const normalized = this.clamp((contactY-paddle.y)/(PADDLE_HEIGHT/2), -1, 1);
+        const maxAngle = 68*Math.PI/180;
+        const direction = side === 'green' ? 1 : -1;
+        const speed = Math.min(15, Math.max(BALL_SPEED, Math.hypot(this.ball.vx,this.ball.vy)*1.025));
+        const baseVy = speed*Math.sin(normalized*maxAngle);
+        const spinVy = paddle.vy*.55;
+        this.ball.vx = direction*Math.max(3.4, speed*Math.cos(normalized*maxAngle));
+        this.ball.vy = this.clamp(baseVy+spinVy, -speed*.94, speed*.94);
+        this.ball.speed = Math.hypot(this.ball.vx,this.ball.vy);
+      }
+
+      cleanBlockerHit(nextX, nextY) {
+        const half = BALL_SIZE/2;
+        for (const blocker of this.blockers) {
+          const ox = nextX+half >= blocker.x-blocker.width/2 && nextX-half <= blocker.x+blocker.width/2;
+          const oy = nextY+half >= blocker.y-blocker.height/2 && nextY-half <= blocker.y+blocker.height/2;
+          if (!ox || !oy) continue;
+          const previousOverlapX = this.ball.x+half >= blocker.x-blocker.width/2 && this.ball.x-half <= blocker.x+blocker.width/2;
+          return { axis: previousOverlapX ? 'y' : 'x' };
+        }
+        return null;
+      }
+
+      detectIntegratedBullshit(before) {
+        if (this.mode !== 'chaos') return;
+
+        const after = this.ball;
+        const distance = Math.hypot(after.x-before.x, after.y-before.y);
+        const hadBonusMove = this.frameEvents.some((e) => e.type === 'bonus-move');
+        if (hadBonusMove && distance >= 18 && distance <= 32) {
+          this.stats.nudges += 1;
+          this.report(`NUDGE #${this.stats.nudges}: collision frame moved ${distance.toFixed(1)} px.`, 'nudge');
+        }
+
+        this.detectPaddlePass(before, after, this.green, 'green');
+        this.detectPaddlePass(before, after, this.pink, 'pink');
+
+        for (const blocker of this.blockers) {
+          if (this.segmentPassesBlocker(before, after, blocker)) {
+            this.stats.blockPhase += 1;
+            this.registerHarmful('BLOCKER PHASE-THROUGH', `Ball crossed the blocker without a usable reflection.`);
+          }
+        }
+
+        const reversedX = Math.sign(before.vx) !== 0 && Math.sign(after.vx) !== 0 && Math.sign(before.vx) !== Math.sign(after.vx);
+        const reversedY = Math.sign(before.vy) !== 0 && Math.sign(after.vy) !== 0 && Math.sign(before.vy) !== Math.sign(after.vy);
+        if ((reversedX || reversedY) && !this.nearAnyCollisionObject(after)) {
+          this.stats.weird += 1;
+          this.report(`WEIRD SAVE #${this.stats.weird}: direction changed in open court.`, 'weird');
+        }
+      }
+
+      detectPaddlePass(before, after, paddle, side) {
+        const halfBall = BALL_SIZE/2;
+        const face = side === 'green' ? paddle.x+PADDLE_WIDTH/2 : paddle.x-PADDLE_WIDTH/2;
+        const back = side === 'green' ? paddle.x-PADDLE_WIDTH/2 : paddle.x+PADDLE_WIDTH/2;
+        const approaching = side === 'green' ? before.vx < 0 : before.vx > 0;
+        const crossedFace = side === 'green'
+          ? before.x-halfBall >= face && after.x+halfBall < back
+          : before.x+halfBall <= face && after.x-halfBall > back;
+        if (!approaching || !crossedFace) return;
+
+        const denom = after.x-before.x;
+        const t = denom === 0 ? 0 : (face-before.x)/denom;
+        const y = before.y+(after.y-before.y)*this.clamp(t,0,1);
+        const overlapsY = y+halfBall >= paddle.y-PADDLE_HEIGHT/2 && y-halfBall <= paddle.y+PADDLE_HEIGHT/2;
+        if (!overlapsY) return;
+
+        if (side === 'green') this.stats.greenPhase += 1;
+        else this.stats.pinkPhase += 1;
+        this.registerHarmful(`${side.toUpperCase()} GOT FUCKED`, 'Paddle phase-through confirmed.');
+      }
+
+      segmentPassesBlocker(before, after, blocker) {
+        const left = blocker.x-blocker.width/2-BALL_SIZE/2;
+        const right = blocker.x+blocker.width/2+BALL_SIZE/2;
+        const top = blocker.y-blocker.height/2-BALL_SIZE/2;
+        const bottom = blocker.y+blocker.height/2+BALL_SIZE/2;
+
+        const verticalPass = ((before.y < top && after.y > bottom) || (before.y > bottom && after.y < top))
+          && this.segmentXAtY(before, after, blocker.y) >= left
+          && this.segmentXAtY(before, after, blocker.y) <= right;
+        const horizontalPass = ((before.x < left && after.x > right) || (before.x > right && after.x < left))
+          && this.segmentYAtX(before, after, blocker.x) >= top
+          && this.segmentYAtX(before, after, blocker.x) <= bottom;
+        return verticalPass || horizontalPass;
+      }
+
+      segmentXAtY(a,b,y) {
+        const d = b.y-a.y;
+        if (d === 0) return Infinity;
+        return a.x+(b.x-a.x)*((y-a.y)/d);
+      }
+
+      segmentYAtX(a,b,x) {
+        const d = b.x-a.x;
+        if (d === 0) return Infinity;
+        return a.y+(b.y-a.y)*((x-a.x)/d);
+      }
+
+      nearAnyCollisionObject(ball) {
+        if (ball.y < 30 || ball.y > HEIGHT-30) return true;
+        for (const paddle of [this.green,this.pink]) {
+          if (Math.abs(ball.x-paddle.x) < 45 && Math.abs(ball.y-paddle.y) < PADDLE_HEIGHT/2+25) return true;
+        }
+        for (const blocker of this.blockers) {
+          if (Math.abs(ball.x-blocker.x) < blocker.width/2+25 && Math.abs(ball.y-blocker.y) < 35) return true;
+        }
+        return false;
+      }
+
+      registerHarmful(title, detail) {
+        const now = performance.now();
+        this.stats.combo = now-this.stats.lastHarmfulAt <= COMBO_WINDOW ? this.stats.combo+1 : 1;
+        this.stats.lastHarmfulAt = now;
+        this.stats.bestCombo = Math.max(this.stats.bestCombo, this.stats.combo);
+        this.stats.cases += 1;
+        this.lastHarmfulLabel = title;
+        const combo = this.stats.combo > 1 ? ` • COMBO x${this.stats.combo}` : '';
+        this.report(`${title}: ${detail}${combo}`, 'harmful');
+        this.showAlert(title, `${detail}${combo}`);
+      }
+
+      showAlert(title, detail) {
+        clearTimeout(this.alertTimer);
+        alertTitle.textContent = title;
+        alertDetail.textContent = detail;
+        alertBox.classList.add('visible');
+        this.alertTimer = setTimeout(() => this.hideAlert(), 800);
+      }
+
+      hideAlert() {
+        clearTimeout(this.alertTimer);
+        alertBox.classList.remove('visible');
+      }
+
+      checkScore() {
+        if (this.ball.x > WIDTH+BALL_SIZE) {
+          this.score('green');
+        } else if (this.ball.x < -BALL_SIZE) {
+          this.score('pink');
+        }
+      }
+
+      score(side) {
+        const now = performance.now();
+        this.scores[side] += 1;
+        if (now-this.stats.lastHarmfulAt <= ASSIST_WINDOW) {
+          this.stats.assists += 1;
+          this.report(`BULLSHIT-ASSISTED GOAL: ${side.toUpperCase()} scored after ${this.lastHarmfulLabel}.`, 'harmful');
+        }
+        this.stats.combo = 0;
+        this.resetRound();
+      }
+
+      report(message, severity = 'neutral') {
+        if (this.incidents[0]?.message === message) return;
+        this.incidents.unshift({ message, severity });
+        this.incidents = this.incidents.slice(0, MAX_LOG);
+        log.replaceChildren();
+        for (const incident of this.incidents.length ? this.incidents : [{message:'Awaiting the first collision felony.',severity:'neutral'}]) {
+          const item = document.createElement('li');
+          item.textContent = incident.message;
+          if (incident.severity !== 'neutral') item.className = incident.severity;
+          log.append(item);
+        }
+      }
+
+      renderHud() {
+        ui.greenScore.value = String(this.scores.green);
+        ui.pinkScore.value = String(this.scores.pink);
+        ui.greenPhase.value = String(this.stats.greenPhase);
+        ui.pinkPhase.value = String(this.stats.pinkPhase);
+        ui.blockPhase.value = String(this.stats.blockPhase);
+        ui.weird.value = String(this.stats.weird);
+        ui.nudges.value = String(this.stats.nudges);
+        ui.combo.value = `x${this.stats.combo} / x${this.stats.bestCombo}`;
+        ui.cases.value = String(this.stats.cases);
+        ui.assists.value = String(this.stats.assists);
+        status.textContent = this.ball.active
+          ? (this.mode === 'chaos' ? 'LEGACY CRIMES IN PROGRESS' : 'RESPONSIBLE PHYSICS')
+          : (matchMedia('(pointer: coarse)').matches ? 'HOLD COURT QUADRANTS • TAP SERVE' : 'PRESS SPACE TO SERVE');
+      }
+
+      draw() {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0,0,WIDTH,HEIGHT);
+
+        ctx.strokeStyle = 'rgba(255,255,255,.16)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([10,14]);
+        ctx.beginPath();
+        ctx.moveTo(WIDTH/2,0);
+        ctx.lineTo(WIDTH/2,HEIGHT);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#4dd2ff';
+        for (const blocker of this.blockers) {
+          ctx.fillRect(blocker.x-blocker.width/2, blocker.y-blocker.height/2, blocker.width, blocker.height);
+        }
+
+        ctx.fillStyle = this.green.color;
+        ctx.fillRect(this.green.x-PADDLE_WIDTH/2, this.green.y-PADDLE_HEIGHT/2, PADDLE_WIDTH, PADDLE_HEIGHT);
+        ctx.fillStyle = this.pink.color;
+        ctx.fillRect(this.pink.x-PADDLE_WIDTH/2, this.pink.y-PADDLE_HEIGHT/2, PADDLE_WIDTH, PADDLE_HEIGHT);
+
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(this.ball.x-BALL_SIZE/2, this.ball.y-BALL_SIZE/2, BALL_SIZE, BALL_SIZE);
+      }
+
+      clamp(value,min,max) {
+        return Math.min(max,Math.max(min,value));
+      }
+    }
+
+    new Pong();
+  })();
+  </script>
 </body>
 </html>
