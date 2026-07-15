@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A browser port of an old Processing Pong game, including its beloved collision crimes.">
+  <title>Pong: Forensic Chaos Edition</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">teamleaderleo / Pong-in-Java</p>
+      <h1>Pong: Forensic Chaos Edition</h1>
+      <p class="lede">A browser port of the 2015 Processing game, with its collision crimes preserved as an interactive museum exhibit.</p>
+    </header>
+
+    <section class="game-layout" aria-label="Pong game">
+      <div class="cabinet">
+        <div class="scoreboard" aria-live="polite">
+          <span><b>GREEN</b> <output id="green-score">0</output></span>
+          <span id="status">PRESS SPACE TO SERVE</span>
+          <span><b>PINK</b> <output id="pink-score">0</output></span>
+        </div>
+        <canvas id="game" width="800" height="800" aria-label="Playable Pong game"></canvas>
+      </div>
+
+      <aside class="panel">
+        <section>
+          <h2>Physics personality</h2>
+          <div class="mode-switch" role="group" aria-label="Physics mode">
+            <button id="chaos-mode" class="active" type="button">Legacy Chaos</button>
+            <button id="clean-mode" type="button">Responsible Physics</button>
+          </div>
+          <p id="mode-copy">Integer coordinates. Collision checks after movement. Secret dead lines. Bonus movement during bounces. An authentic little disaster.</p>
+        </section>
+
+        <section>
+          <h2>Controls</h2>
+          <dl class="controls">
+            <div><dt>Green</dt><dd>W / S</dd></div>
+            <div><dt>Pink</dt><dd>↑ / ↓</dd></div>
+            <div><dt>Serve</dt><dd>Space</dd></div>
+            <div><dt>Reset</dt><dd>R</dd></div>
+            <div><dt>Mode</dt><dd>C</dd></div>
+          </dl>
+        </section>
+
+        <section>
+          <h2>Live incident report</h2>
+          <ol id="incident-log" class="incident-log" aria-live="polite">
+            <li>Awaiting the first collision felony.</li>
+          </ol>
+        </section>
+      </aside>
+    </section>
+
+    <section class="museum">
+      <h2>Known exhibits</h2>
+      <div class="cards">
+        <article><h3>The Integer Wood Chipper</h3><p>Trigonometry enters as a decimal and leaves missing pieces.</p></article>
+        <article><h3>The Paddle Dead Lines</h3><p>Four exact Y coordinates belong to no collision zone whatsoever.</p></article>
+        <article><h3>The 2.5× Collision Frame</h3><p>Move once, bounce, move again, then half-move for luck.</p></article>
+        <article><h3>The Obstacle Coin Toss</h3><p>Two blockers can reverse the same angle twice and call it physics.</p></article>
+        <article><h3>Zeus Balancing</h3><p>Green occasionally receives divine competitive intervention.</p></article>
+        <article><h3>Actual Topspin</h3><p>Clean mode adds paddle velocity to the outgoing ball instead of merely checking whether a key exists.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
