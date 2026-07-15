@@ -1,0 +1,38 @@
+#forensic-replay-ball {
+  fill: #fff;
+  stroke: #ff496d;
+  stroke-width: 5;
+  opacity: 0;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.9));
+}
+
+#forensic-replay-ball.running {
+  opacity: 1;
+  animation: forensic-ball-pulse 180ms steps(2, end) infinite;
+}
+
+.forensic-review.weird #forensic-replay-ball,
+.forensic-review.nudge #forensic-replay-ball {
+  stroke: #ffe58f;
+}
+
+.forensic-review.visible #forensic-path {
+  animation: forensic-path-scan 460ms linear infinite;
+}
+
+.forensic-review.visible #forensic-impact {
+  animation: forensic-impact-pulse 420ms ease-in-out infinite alternate;
+}
+
+@keyframes forensic-path-scan {
+  to { stroke-dashoffset: -40; }
+}
+
+@keyframes forensic-impact-pulse {
+  from { r: 28; opacity: .55; }
+  to { r: 42; opacity: 1; }
+}
+
+@keyframes forensic-ball-pulse {
+  50% { opacity: .55; }
+}

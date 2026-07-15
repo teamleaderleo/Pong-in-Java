@@ -1,0 +1,181 @@
+.bullshit-board {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* The raw detector banner duplicated the forensic callout and covered play. */
+.bullshit-banner {
+  display: none !important;
+}
+
+.forensic-review {
+  place-items: start;
+  padding: 8px;
+  transform: none;
+}
+
+.forensic-review::before {
+  display: none;
+}
+
+.forensic-evidence {
+  opacity: .48;
+}
+
+.forensic-review-card {
+  width: min(52%, 390px);
+  margin: 0;
+  gap: 3px;
+  padding: 7px 9px;
+  border-width: 1px;
+  border-radius: 7px;
+  background: rgba(7, 7, 10, .76);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, .38);
+  text-align: left;
+  transform: none;
+}
+
+#forensic-case {
+  font-size: .52rem;
+  letter-spacing: .1em;
+}
+
+#forensic-title {
+  font-size: clamp(.82rem, 2.3vw, 1.15rem);
+  line-height: 1;
+  letter-spacing: -.025em;
+  text-shadow: none;
+}
+
+#forensic-detail {
+  display: none;
+}
+
+#forensic-verdict {
+  justify-self: start;
+  padding: 2px 5px;
+  font-size: .52rem;
+  letter-spacing: .04em;
+}
+
+.court-stage.reviewing canvas {
+  filter: none;
+}
+
+#forensic-path {
+  stroke-width: 3;
+  opacity: .55;
+}
+
+#forensic-arrow {
+  stroke-width: 5;
+  opacity: .7;
+}
+
+#forensic-impact {
+  stroke-width: 5;
+  opacity: .7;
+}
+
+.forensic-cross {
+  stroke-width: 6;
+  opacity: .7;
+}
+
+@media (hover: none), (pointer: coarse), (max-width: 760px) {
+  /* The court is now the paddle controller. Keep only utility actions below it. */
+  .touch-controls {
+    grid-template-columns: 1fr;
+    gap: 5px;
+    padding: 6px 8px;
+  }
+
+  .touch-paddle {
+    display: none;
+  }
+
+  .touch-actions {
+    grid-column: auto;
+    grid-row: auto;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .touch-controls button,
+  .touch-actions button {
+    min-height: 42px;
+  }
+
+  /* Trajectory SVGs add little on a phone and compete with the game loop. */
+  .forensic-evidence {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .bullshit-board {
+    display: flex;
+    gap: 1px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .bullshit-board::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stat-card {
+    flex: 0 0 82px;
+    min-height: 38px;
+    padding: 4px;
+    scroll-snap-align: start;
+  }
+
+  .stat-card span {
+    min-height: 0;
+    white-space: nowrap;
+    font-size: .43rem;
+    letter-spacing: .035em;
+  }
+
+  .stat-card output {
+    margin: 0;
+    font-size: .98rem;
+  }
+
+  .stat-card small {
+    display: none;
+  }
+
+  .forensic-review {
+    padding: 5px;
+  }
+
+  .forensic-review-card {
+    width: min(72%, 260px);
+    padding: 5px 7px;
+  }
+
+  #forensic-case {
+    font-size: .45rem;
+  }
+
+  #forensic-title {
+    font-size: .78rem;
+  }
+
+  #forensic-verdict {
+    font-size: .45rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forensic-review,
+  #forensic-path,
+  #forensic-impact,
+  #forensic-replay-ball {
+    animation: none !important;
+    transition: none !important;
+  }
+}
