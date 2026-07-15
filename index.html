@@ -8,6 +8,7 @@
   <title>Pong: Forensic Chaos Edition</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="forensic-replay.css">
+  <link rel="stylesheet" href="forensic-animation.css">
 </head>
 <body>
   <main class="shell">
@@ -87,6 +88,9 @@
               <circle id="forensic-impact" r="34"></circle>
               <line id="forensic-cross-a" class="forensic-cross"></line>
               <line id="forensic-cross-b" class="forensic-cross"></line>
+              <circle id="forensic-replay-ball" r="10">
+                <animateMotion id="forensic-motion" begin="indefinite" fill="freeze"></animateMotion>
+              </circle>
             </svg>
             <div class="forensic-review-card">
               <span id="forensic-case">PHYSICS REVIEW</span>
@@ -182,6 +186,7 @@
 
   <script src="bullshit-telemetry.js"></script>
   <script src="forensic-replay.js"></script>
+  <script src="forensic-animation.js"></script>
   <script src="app.js"></script>
   <script src="mobile-controls.js"></script>
 </body>
