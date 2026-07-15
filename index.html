@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07070a">
   <meta name="description" content="A browser port of an old Processing Pong game, including its beloved collision crimes.">
   <title>Pong: Forensic Chaos Edition</title>
   <link rel="stylesheet" href="styles.css">
@@ -16,13 +17,37 @@
     </header>
 
     <section class="game-layout" aria-label="Pong game">
-      <div class="cabinet">
+      <div class="cabinet" id="game-cabinet">
         <div class="scoreboard" aria-live="polite">
           <span><b>GREEN</b> <output id="green-score">0</output></span>
           <span id="status">PRESS SPACE TO SERVE</span>
           <span><b>PINK</b> <output id="pink-score">0</output></span>
         </div>
         <canvas id="game" width="800" height="800" aria-label="Playable Pong game"></canvas>
+
+        <div class="touch-controls" aria-label="Mobile game controls">
+          <div class="touch-paddle green-touch" aria-label="Green paddle controls">
+            <span>GREEN</span>
+            <div class="touch-pair">
+              <button type="button" data-hold-key="w" aria-label="Move green paddle up">▲</button>
+              <button type="button" data-hold-key="s" aria-label="Move green paddle down">▼</button>
+            </div>
+          </div>
+
+          <div class="touch-actions">
+            <button type="button" data-tap-key="Space" class="serve-button">SERVE</button>
+            <button type="button" data-tap-key="r">RESET</button>
+            <button type="button" id="fullscreen-button">FULLSCREEN</button>
+          </div>
+
+          <div class="touch-paddle pink-touch" aria-label="Pink paddle controls">
+            <span>PINK</span>
+            <div class="touch-pair">
+              <button type="button" data-hold-key="ArrowUp" aria-label="Move pink paddle up">▲</button>
+              <button type="button" data-hold-key="ArrowDown" aria-label="Move pink paddle down">▼</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <aside class="panel">
@@ -38,9 +63,9 @@
         <section>
           <h2>Controls</h2>
           <dl class="controls">
-            <div><dt>Green</dt><dd>W / S</dd></div>
-            <div><dt>Pink</dt><dd>↑ / ↓</dd></div>
-            <div><dt>Serve</dt><dd>Space</dd></div>
+            <div><dt>Green</dt><dd>W / S or touch</dd></div>
+            <div><dt>Pink</dt><dd>↑ / ↓ or touch</dd></div>
+            <div><dt>Serve</dt><dd>Space or tap</dd></div>
             <div><dt>Reset</dt><dd>R</dd></div>
             <div><dt>Mode</dt><dd>C</dd></div>
           </dl>
@@ -69,5 +94,6 @@
   </main>
 
   <script src="app.js"></script>
+  <script src="mobile-controls.js"></script>
 </body>
 </html>
