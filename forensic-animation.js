@@ -2,16 +2,61 @@
   'use strict';
 
   const review = document.querySelector('#forensic-review');
+  const stage = document.querySelector('.court-stage');
   const path = document.querySelector('#forensic-path');
   const motion = document.querySelector('#forensic-motion');
   const replayBall = document.querySelector('#forensic-replay-ball');
 
-  if (!review || !path || !motion || !replayBall) return;
+  if (!review || !stage || !path || !motion || !replayBall) return;
+
+  // Keep the commentary while allowing the rally to continue uninterrupted.
+  let rafSerial = 0;
+  const rafTimers = new Map();
+
+  window.requestAnimationFrame = (callback) => {
+    const id = ++rafSerial;
+    const timer = window.setTimeout(() => {
+      rafTimers.delete(id);
+      callback(performance.now());
+    }, 16);
+    rafTimers.set(id, timer);
+    return id;
+  };
+
+  window.cancelAnimationFrame = (id) => {
+    const timer = rafTimers.get(id);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      rafTimers.delete(id);
+    }
+  };
 
   let lastSignature = '';
+  let hideTimer = null;
+
+  function hideReview() {
+    review.classList.remove('visible');
+    stage.classList.remove('reviewing');
+    replayBall.classList.remove('running');
+  }
 
   function playEvidence() {
     if (!review.classList.contains('visible')) return;
+
+    clearTimeout(hideTimer);
+
+    // Harmless anomalies stay in the counters and logs. They no longer cover
+    // the court or interrupt play.
+    if (review.classList.contains('weird') || review.classList.contains('nudge')) {
+      hideReview();
+      return;
+    }
+
+    hideTimer = window.setTimeout(
+      hideReview,
+      review.classList.contains('goal') ? 900 : 700
+    );
+
     const points = path.getAttribute('points')?.trim();
     if (!points || points === lastSignature) return;
     lastSignature = points;
@@ -28,7 +73,7 @@
       .join(' ');
 
     motion.setAttribute('path', pathData);
-    motion.setAttribute('dur', review.classList.contains('goal') ? '1.2s' : (review.classList.contains('harmful') ? '.9s' : '.45s'));
+    motion.setAttribute('dur', review.classList.contains('goal') ? '.8s' : '.55s');
     replayBall.classList.remove('running');
     void replayBall.getBoundingClientRect();
     replayBall.classList.add('running');
