@@ -1,0 +1,173 @@
+.case-stat output { color: #fff; }
+.goal-stat output { color: #ff91a7; }
+
+.forensic-review {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(.97);
+  transition: opacity 110ms ease, transform 150ms cubic-bezier(.2, 1.25, .35, 1);
+}
+
+.forensic-review::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 50% 48%, rgba(255, 45, 88, .12), rgba(0, 0, 0, .76) 62%);
+  backdrop-filter: blur(1px) saturate(.55);
+}
+
+.forensic-review.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.forensic-review.weird::before,
+.forensic-review.nudge::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 50% 48%, rgba(255, 213, 79, .12), rgba(0, 0, 0, .72) 62%);
+}
+
+.forensic-review.goal::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 50% 48%, rgba(255, 45, 88, .24), rgba(0, 0, 0, .82) 66%);
+}
+
+.forensic-evidence {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+#forensic-path {
+  fill: none;
+  stroke: rgba(255, 245, 157, .65);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 11 9;
+}
+
+#forensic-arrow {
+  stroke: #fff59d;
+  stroke-width: 8;
+  stroke-linecap: round;
+  marker-end: url(#forensic-arrowhead);
+  filter: drop-shadow(0 0 8px rgba(255, 245, 157, .9));
+}
+
+#forensic-impact {
+  fill: rgba(255, 45, 88, .16);
+  stroke: #ff496d;
+  stroke-width: 8;
+  filter: drop-shadow(0 0 12px rgba(255, 45, 88, .9));
+}
+
+.forensic-cross {
+  stroke: #ff496d;
+  stroke-width: 10;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px rgba(255, 45, 88, .9));
+}
+
+.forensic-review.weird #forensic-impact,
+.forensic-review.weird .forensic-cross,
+.forensic-review.nudge #forensic-impact,
+.forensic-review.nudge .forensic-cross {
+  stroke: #ffe58f;
+  filter: drop-shadow(0 0 10px rgba(255, 229, 143, .9));
+}
+
+.forensic-review-card {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: min(86%, 690px);
+  gap: 12px;
+  padding: clamp(18px, 4vw, 34px);
+  border: 2px solid rgba(255, 73, 109, .72);
+  border-radius: 12px;
+  background: rgba(8, 8, 12, .88);
+  box-shadow: 0 0 0 6px rgba(0,0,0,.36), 0 0 55px rgba(255, 45, 88, .25);
+  text-align: center;
+  transform: rotate(-.7deg);
+}
+
+.forensic-review.weird .forensic-review-card,
+.forensic-review.nudge .forensic-review-card {
+  border-color: rgba(255, 229, 143, .72);
+  box-shadow: 0 0 0 6px rgba(0,0,0,.36), 0 0 55px rgba(255, 229, 143, .18);
+}
+
+#forensic-case {
+  color: #ff91a7;
+  font-size: clamp(.68rem, 2vw, .95rem);
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.forensic-review.weird #forensic-case,
+.forensic-review.nudge #forensic-case { color: #ffe58f; }
+
+#forensic-title {
+  color: #fff;
+  font-size: clamp(2rem, 7.2vw, 5.2rem);
+  line-height: .91;
+  letter-spacing: -.065em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  text-shadow: 0 5px 0 rgba(0,0,0,.72), 0 0 28px rgba(255,255,255,.18);
+}
+
+#forensic-detail {
+  color: #f5f1e8;
+  font-size: clamp(.82rem, 2.3vw, 1.25rem);
+  font-weight: 800;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+#forensic-verdict {
+  justify-self: center;
+  padding: 8px 12px;
+  border: 1px solid currentColor;
+  color: #ff6d88;
+  font-size: clamp(.72rem, 2vw, 1rem);
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.forensic-review.weird #forensic-verdict,
+.forensic-review.nudge #forensic-verdict { color: #ffe58f; }
+.forensic-review.goal #forensic-verdict { color: #fff; background: #c6153d; }
+
+.court-stage.reviewing canvas {
+  filter: grayscale(.55) brightness(.54) contrast(1.18);
+}
+
+.forensic-entry {
+  border-left: 2px solid currentColor;
+  padding-left: 10px !important;
+}
+
+@media (max-width: 600px) {
+  .bullshit-board { grid-template-columns: repeat(4, 1fr); }
+  .stat-card { padding: 7px 5px; }
+  .stat-card span { white-space: normal; min-height: 2.4em; }
+  .stat-card small { display: none; }
+  .forensic-review-card { width: 90%; gap: 8px; padding: 16px 13px; }
+  #forensic-title { font-size: clamp(1.65rem, 8vw, 3.2rem); }
+}
