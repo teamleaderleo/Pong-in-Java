@@ -43,6 +43,29 @@ The site is plain HTML, CSS, and JavaScript. It can be deployed directly to GitH
 | Reset | `R` |
 | Toggle physics mode | `C` |
 
+## Bullshit telemetry and instant review
+
+Legacy Chaos now watches its own output like a sports broadcast staffed by increasingly alarmed forensic analysts.
+
+The counters deliberately separate consequences:
+
+- **Green got fucked / Pink got fucked:** the ball crossed the paddle face inside its vertical reach, continued behind the paddle, and escaped toward the score boundary.
+- **Block phases:** the ball entered a visible blocker and emerged from the opposite side.
+- **Harmful combo:** consecutive phase-throughs inside a four-second window. Paddle-plus-blocker chains become **CHAIN OF CUSTODY LOST**. Two blocker passes become **DOUBLE BLOCKER PENETRATION**.
+- **Weird saves:** broken or repeated reflections that eventually return the ball to play.
+- **Nudges:** visible bonus movement such as the old full-move-plus-half-move sequence.
+- **BS-assisted goals:** points scored soon after a harmful chain.
+
+A serious offense pauses the rally and opens a numbered physics review. The review draws the recent trajectory, marks the incident point, animates the ball along the captured path, and issues an official verdict such as:
+
+- `COLLISION SCHEDULED. BALL DIDN'T ATTEND.`
+- `THE PADDLE FILED A COMPLAINT.`
+- `OBSTACLE DECLARED OPTIONAL.`
+- `OBJECT PERMANENCE FAILURE.`
+- `BULLSHIT-ASSISTED GOAL.`
+
+Harmless anomalies receive a shorter review and stay outside the harmful combo. Broken physics that saves the rally receives credit for fixing its own mess.
+
 ## The two physics personalities
 
 ### Legacy Chaos
