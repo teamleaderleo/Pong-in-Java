@@ -11,9 +11,19 @@ The repository now contains two versions:
 - The original Java/Processing game, preserved in all its youthful confidence.
 - A zero-build browser port that runs the same idea in **Legacy Chaos** or **Responsible Physics** mode.
 
-## Play the browser version
+## Play it
 
-Open `index.html` directly, or serve the folder with any static server:
+**Live deployment:** https://pong-forensic-chaos.vercel.app
+
+The browser version works with keyboards and touchscreens. On phones and tablets, large multi-touch controls appear beneath the court:
+
+- Hold the green arrows to move the green paddle.
+- Hold the pink arrows to move the pink paddle.
+- Both players can hold controls simultaneously on one device.
+- Tap **Serve** or tap the court to begin.
+- Use **Fullscreen** for the dedicated tiny arcade cabinet experience.
+
+You can also open `index.html` directly, or serve the folder with any static server:
 
 ```bash
 python -m http.server 8000
@@ -23,7 +33,7 @@ Then visit `http://localhost:8000`.
 
 The site is plain HTML, CSS, and JavaScript. It can be deployed directly to GitHub Pages, Netlify, Cloudflare Pages, or Vercel with no build command and no output-directory configuration.
 
-### Controls
+### Keyboard controls
 
 | Action | Control |
 | --- | --- |
