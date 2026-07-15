@@ -7,6 +7,7 @@
   <meta name="description" content="A browser port of an old Processing Pong game, including its beloved collision crimes.">
   <title>Pong: Forensic Chaos Edition</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="forensic-replay.css">
 </head>
 <body>
   <main class="shell">
@@ -55,6 +56,16 @@
             <output id="nudge-count">0</output>
             <small>bonus movement crimes</small>
           </div>
+          <div class="stat-card case-stat">
+            <span>FORENSIC CASES</span>
+            <output id="case-count">0</output>
+            <small>serious offenses reviewed</small>
+          </div>
+          <div class="stat-card goal-stat">
+            <span>BS-ASSISTED GOALS</span>
+            <output id="bullshit-goal-count">0</output>
+            <small>points after harmful chains</small>
+          </div>
         </div>
 
         <div class="court-stage">
@@ -62,6 +73,27 @@
           <div id="bullshit-banner" class="bullshit-banner" aria-live="assertive" aria-atomic="true">
             <strong id="bullshit-banner-title"></strong>
             <span id="bullshit-banner-detail"></span>
+          </div>
+
+          <div id="forensic-review" class="forensic-review" aria-live="assertive" aria-atomic="true">
+            <svg class="forensic-evidence" viewBox="0 0 800 800" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <marker id="forensic-arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                  <path d="M0,0 L12,6 L0,12 Z" fill="#fff59d"></path>
+                </marker>
+              </defs>
+              <polyline id="forensic-path"></polyline>
+              <line id="forensic-arrow"></line>
+              <circle id="forensic-impact" r="34"></circle>
+              <line id="forensic-cross-a" class="forensic-cross"></line>
+              <line id="forensic-cross-b" class="forensic-cross"></line>
+            </svg>
+            <div class="forensic-review-card">
+              <span id="forensic-case">PHYSICS REVIEW</span>
+              <strong id="forensic-title"></strong>
+              <span id="forensic-detail"></span>
+              <span id="forensic-verdict"></span>
+            </div>
           </div>
         </div>
 
@@ -102,9 +134,10 @@
 
         <section>
           <h2>What gets counted</h2>
-          <p><b>Harmful:</b> paddle and blocker phase-throughs. These build the combo.</p>
+          <p><b>Harmful:</b> paddle and blocker phase-throughs. These build the combo and receive a freeze-frame review.</p>
           <p><b>Weird saves:</b> broken reflections that send the ball back into play.</p>
           <p><b>Nudges:</b> oversized visible movement from bonus moves. They stay separate from phase-throughs.</p>
+          <p><b>BS-assisted goals:</b> points scored shortly after a harmful chain.</p>
         </section>
 
         <section>
@@ -148,6 +181,7 @@
   </main>
 
   <script src="bullshit-telemetry.js"></script>
+  <script src="forensic-replay.js"></script>
   <script src="app.js"></script>
   <script src="mobile-controls.js"></script>
 </body>
